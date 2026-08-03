@@ -6,16 +6,20 @@
 
 また、フォロー中のユーザーが作成したタスクを一覧表示できるようにする
 
+## サンプルビデオ
+
+<https://github.com/user-attachments/assets/8e76d055-9503-41a8-a1f1-aca922b6385c>
+
 ## 詳細
 
 ### Rails
 
 - 次のエンドポイントを作成する
 
-| HTTP メソッド | パス | アクション名 | 用途 |
-| --- | --- | --- | --- |
-| `PUT` | `/api/users/follow/:target_user_id` | `create` | ユーザーをフォローする |
-| `DELETE` | `/api/users/follow/:target_user_id` | `destroy` | ユーザーをアンフォローする |
+| HTTP メソッド | パス                                | アクション名 | 用途                       |
+| ------------- | ----------------------------------- | ------------ | -------------------------- |
+| `PUT`         | `/api/users/follow/:target_user_id` | `create`     | ユーザーをフォローする     |
+| `DELETE`      | `/api/users/follow/:target_user_id` | `destroy`    | ユーザーをアンフォローする |
 
 - コントローラー名は `FollowsController` とする
 - サインイン中のユーザーと対象ユーザーに紐づく `follows` レコードを作成・削除する
