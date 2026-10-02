@@ -35,11 +35,11 @@ docker compose up -d --wait db
 
 docker compose exec -T db mysql \
   -uroot \
-  -p"${MYSQL_ROOT_PASSWORD}" <<QUERY
-    CREATE DATABASE IF NOT EXISTS \`${DATABASE_TABLE_NAME}\`
-      CHARACTER SET ${DATABASE_CHARSET}
-      COLLATE ${DATABASE_COLLATION};
-    CREATE USER IF NOT EXISTS '${DATABASE_USER_NAME}'@'%' IDENTIFIED BY '${DATABASE_USER_PASSWORD}';
+  -p"root" <<QUERY
+    CREATE DATABASE IF NOT EXISTS pre_joining_assignment_for_intern
+      CHARACTER SET "utf8mb4"
+      COLLATE "utf8mb4_0900_ai_ci";
+    CREATE USER IF NOT EXISTS 'rails_client'@'%' IDENTIFIED BY 'root';
     GRANT
       ALTER,
       CREATE,
@@ -51,7 +51,7 @@ docker compose exec -T db mysql \
       REFERENCES,
       SELECT,
       UPDATE
-    ON \`${DATABASE_TABLE_NAME}\`.* TO '${DATABASE_USER_NAME}'@'%';
+    ON pre_joining_assignment_for_intern.* TO 'rails_client'@'%';
     FLUSH PRIVILEGES;
 QUERY
 
