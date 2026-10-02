@@ -4,17 +4,13 @@ import {
   type RouteRecordRaw,
 } from 'vue-router';
 
-/* Import Pages /// */
-
-import Root from '@/pages/Root.vue';
-
-/* /// Import Pages */
-
-const routes: RouteRecordRaw[] = [
-  { path: '/', component: Root },
-];
+import {routes, handleHotUpdate} from 'vue-router/auto-routes';
 
 export const router = createRouter({
   history: createWebHistory(),
   routes,
 });
+
+if (import.meta.hot) {
+  handleHotUpdate(router);
+}
