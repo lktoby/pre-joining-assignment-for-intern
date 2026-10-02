@@ -20,6 +20,11 @@ export default {
                 password: this.password
             };
 
+            if (user.identifier.length < 8 || user.password.length < 8) {
+                alert('ユーザーIDとパスワードは8文字以上で入力してください');
+                return;
+            }
+
             try {
                 const response = await fetch('/api/users', {
                     method: 'POST',
@@ -32,7 +37,8 @@ export default {
                 if (response.ok) {
                     this.$router.push('/sign_in');
                 } else {
-                    alert(response.statusText);
+                    const body = await response.json();
+                    alert(`ユーザー登録に失敗しました (${response.status})`);
                 }
             } catch (error) {
                 console.error('Failed to create user', error);
