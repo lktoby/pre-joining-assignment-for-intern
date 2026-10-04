@@ -7,6 +7,10 @@ Rails.application.routes.draw do
 
   post "/api/users", to: "users#create"
 
+  get "/api/sessions/new", to: "sessions#new"
+
+  post "/api/sessions", to: "sessions#create"
+
   # Defines the root path route ("/")
   # root "posts#index"
 end
