@@ -14,6 +14,11 @@ export default {
                 alert('パスワードが一致しません');
                 return;
             }
+            const csrfTokenResponse = await fetch('/api/csrf-token', {
+                method: 'GET',
+                credentials: 'include'
+            });
+            const csrfToken = await csrfTokenResponse.json();
             const user = {
                 name: this.name,
                 identifier: this.identifier,
@@ -24,7 +29,8 @@ export default {
                 const response = await fetch('/api/users', {
                     method: 'POST',
                     headers: {
-                        'Content-Type': 'application/json'
+                        'Content-Type': 'application/json',
+                        'X-CSRF-Token': csrfToken.csrfToken
                     },
                     body: JSON.stringify({ user })
                 });

@@ -11,6 +11,8 @@ Rails.application.routes.draw do
 
   post "/api/sessions", to: "sessions#create"
 
+  get "/api/csrf-token", to: "csrf#show"
+
   # Defines the root path route ("/")
   # root "posts#index"
 end
