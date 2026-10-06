@@ -45,7 +45,7 @@ export default {
 
 <template>
     <form @submit.prevent="createTask">
-        <p>タスク内容 <input type="text" v-model="taskBody" required></p>
+        <p>タスク内容 <input type="text" v-model="taskBody"></p>
         <button type="submit">タスクを作成</button>
     </form>
 </template>
