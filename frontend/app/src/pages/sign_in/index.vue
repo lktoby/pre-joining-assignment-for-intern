@@ -1,5 +1,5 @@
 <script lang="tsx">
-
+import { getCsrfToken } from '@/repositories/csrfTokenRepository';
 export default {
     data() {
         return {
@@ -11,11 +11,7 @@ export default {
     methods: {
         async getCsrfToken() {
             try {
-                const response = await fetch('/api/csrf-token', {
-                    method: 'GET',
-                    credentials: 'include'
-                });
-
+                const response = await getCsrfToken();
                 if (response.ok) {
                     const body = await response.json();
                     this.csrfToken = body.csrfToken;
