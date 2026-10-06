@@ -1,11 +1,15 @@
-<!--このファイルは削除して結構です！ -->
-
 <script lang="ts">
-import RootComponent from '@/components/Root.component.vue';
-
 export default {
-  components: {
-    RootComponent,
+  async mounted() {
+    try {
+      const response = await fetch('/api/sessions/new');
+      const data = await response.json();
+      if (data.status == 'unauthenticated') {
+        window.location.href = '/sign_in';
+      }
+    } catch (error) {
+      console.error(error);
+    }
   }
 }
 </script>
@@ -13,6 +17,5 @@ export default {
 <template>
   <div>
     RootView
-    <RootComponent />
   </div>
 </template>
