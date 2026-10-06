@@ -1,4 +1,5 @@
 <script lang="ts">
+import { getCsrfToken } from '@/repositories/csrfTokenRepository';
 export default {
     data() {
         return {
@@ -14,10 +15,7 @@ export default {
                 alert('パスワードが一致しません');
                 return;
             }
-            const csrfTokenResponse = await fetch('/api/csrf-token', {
-                method: 'GET',
-                credentials: 'include'
-            });
+            const csrfTokenResponse = await getCsrfToken();
             const csrfToken = await csrfTokenResponse.json();
             const user = {
                 name: this.name,

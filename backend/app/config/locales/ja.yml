@@ -3,3 +3,5 @@ ja:
     attributes:
       user:
         name: ユーザー名
+      task:
+        body: タスク内容
