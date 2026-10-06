@@ -13,6 +13,8 @@ Rails.application.routes.draw do
 
   get "/api/csrf-token", to: "csrf#show"
 
+  post "/api/tasks", to: "tasks#create"
+
   # Defines the root path route ("/")
   # root "posts#index"
 end
