@@ -10,7 +10,16 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_02_085253) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_06_011015) do
+  create_table "tasks", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+    t.string "body"
+    t.datetime "created_at", null: false
+    t.boolean "is_completed", default: false
+    t.datetime "updated_at", null: false
+    t.bigint "user_id", null: false
+    t.index ["user_id"], name: "index_tasks_on_user_id"
+  end
+
   create_table "user_authentications", primary_key: "identifier", id: :string, charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.string "password_digest"
@@ -25,5 +34,6 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_02_085253) do
     t.datetime "updated_at", null: false
   end
 
+  add_foreign_key "tasks", "users"
   add_foreign_key "user_authentications", "users"
 end
