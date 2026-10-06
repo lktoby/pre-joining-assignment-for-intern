@@ -1,5 +1,6 @@
 <script lang="tsx">
 import { createTask as createTaskReq } from '@/repositories/taskRepository';
+import { getCsrfToken } from '@/repositories/csrfTokenRepository';
 export default {
   data() {
     return {
@@ -10,11 +11,7 @@ export default {
     methods: {
         async getCsrfToken() {
             try {
-                const response = await fetch('/api/csrf-token', {
-                    method: 'GET',
-                    credentials: 'include'
-                });
-
+                const response = await getCsrfToken();
                 if (response.ok) {
                     const body = await response.json();
                     this.csrfToken = body.csrfToken;
@@ -27,14 +24,14 @@ export default {
         },
         async createTask() {
             try {
-            const response = await createTaskReq(this.taskBody, this.csrfToken);
-            if (response.ok) {
-                this.taskBody = '';
-                window.location.href = '/';
-            } else {
-                const body = await response.json();
-                window.alert(body.error);
-            }
+                const response = await createTaskReq(this.taskBody, this.csrfToken);
+                if (response.ok) {
+                    this.taskBody = '';
+                    window.location.href = '/';
+                } else {
+                    const body = await response.json();
+                    window.alert(body.error);
+                }
             } catch (error) {
                 console.error(error);
             }
