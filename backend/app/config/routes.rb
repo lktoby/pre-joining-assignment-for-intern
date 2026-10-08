@@ -15,6 +15,8 @@ Rails.application.routes.draw do
 
   post "/api/tasks", to: "tasks#create"
 
+  get "/api/tasks", to: "tasks#index"
+
   # Defines the root path route ("/")
   # root "posts#index"
 end
