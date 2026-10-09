@@ -24,15 +24,13 @@ export default {
             ],
             has_next: false
         },
+        isLoading: false
     };
     },
     methods: {
         formatDate(dateString: string) {
             const date = new Date(dateString);
             return date.toLocaleString();
-        },
-        updatePage() {
-            return this.page += 1;
         },
         async getCsrfToken() {
             try {
@@ -62,8 +60,11 @@ export default {
             }
         },
         async getTasks(type: string, page: number) {
+            this.isLoading = true;
             try {
-                const response = await getTasksReq(this.taskType, this.page, this.csrfToken);
+                const response = await getTasksReq(type, page, this.csrfToken);
+                this.taskType = type;
+                this.page = page;
                 if (response.ok) {
                     const data = await response.json();
                     console.log(data);
@@ -74,10 +75,14 @@ export default {
                         this.tasks.has_next = data.has_next;
                     }
                 } else {
-                    console.error(response.status, response.statusText);
+                    const body = await response.json();
+                    window.alert(body.error);
                 }
             } catch (error) {
                 console.error(error);
+                window.alert('タスクの取得に失敗しました');
+            } finally {
+                this.isLoading = false;
             }
         }
     },
@@ -108,7 +113,7 @@ export default {
         <p>{{ task.body }}</p>
         <hr>
     </div>
-    <button v-if="tasks.has_next" v-on:click="getTasks(taskType, updatePage())">さらに読み込む</button>
+    <button v-if="tasks.has_next" :disabled="isLoading" v-on:click="getTasks(taskType, page+1)">さらに読み込む</button>
 </template>
 
 <style lang="css" scoped>
