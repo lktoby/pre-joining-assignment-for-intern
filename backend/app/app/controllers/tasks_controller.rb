@@ -64,11 +64,60 @@ class TasksController < ApplicationController
     end
   end
 
+  def complete
+    if session[:identifier].nil?
+      render json: { error: "サインインしていません" }, status: :unauthorized
+      return
+    end
+    @user = UserAuthentication.find_by(identifier: session[:identifier])
+    if @user.nil?
+      render json: { error: "サインインしていません" }, status: :unauthorized
+      return
+    elsif @user.identifier != session[:identifier]
+      render json: { error: "ユーザーが見つかりません" }, status: :not_found
+      return
+    end
+    @task = Task.find_by(id: task_put_params[:task_id], user_id: @user.user_id)
+    if @task.nil?
+      render json: { error: "タスクが見つかりません" }, status: :not_found
+      return
+    else
+      @task.update!(is_completed: true)
+      render json: { task: @task.as_json(only: [:id, :is_completed]) }, status: :ok
+    end
+  end
+
+  def incomplete
+    if session[:identifier].nil?
+      render json: { error: "サインインしていません" }, status: :unauthorized
+      return
+    end
+    @user = UserAuthentication.find_by(identifier: session[:identifier])
+    if @user.nil?
+      render json: { error: "サインインしていません" }, status: :unauthorized
+      return
+    elsif @user.identifier != session[:identifier]
+      render json: { error: "ユーザーが見つかりません" }, status: :not_found
+      return
+    end
+    @task = Task.find_by(id: task_put_params[:task_id], user_id: @user.user_id)
+    if @task.nil?
+      render json: { error: "タスクが見つかりません" }, status: :not_found
+      return
+    else
+      @task.update!(is_completed: false)
+      render json: { task: @task.as_json(only: [:id, :is_completed]) }, status: :ok
+    end
+  end
+
   private
   def task_params
     params.require(:task).permit(:body)
   end
   def task_query_params
     params.permit(:type, :page)
+  end
+  def task_put_params
+    params.permit(:task_id)
   end
 end

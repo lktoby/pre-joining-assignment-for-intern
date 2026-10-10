@@ -17,6 +17,10 @@ Rails.application.routes.draw do
 
   get "/api/tasks", to: "tasks#index"
 
+  put "/api/tasks/:task_id/complete", to: "tasks#complete"
+
+  put "/api/tasks/:task_id/incomplete", to: "tasks#incomplete"
+
   # Defines the root path route ("/")
   # root "posts#index"
 end
