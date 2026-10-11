@@ -32,6 +32,7 @@ class TasksController < ApplicationController
     end
     user_id = @user.user_id
     type = task_query_params[:type] || "my"
+    completion = task_query_params[:completion] || "all"
     begin
       page = task_query_params[:page].nil? ? 1 : Integer(task_query_params[:page])
     rescue ArgumentError
@@ -61,6 +62,28 @@ class TasksController < ApplicationController
       render json: {tasks: @tasks.as_json(include: {user: {only: [:id, :name]}}), has_next: @has_next}, status: :ok
     else
       render json: { error: "不正な値が入力されています" }, status: :bad_request
+    end
+    if completion == "complete"
+      @has_next = Task.where(user_id: user_id, is_completed: true).count > offset + 15 ? true : false
+      @tasks = Task.includes(:user).where(user_id: user_id, is_completed: true).order(created_at: :desc, id: :desc).limit(15).offset(offset)
+      if @tasks.count == 0
+        render json: { tasks: [], has_next: false }, status: :ok
+        return
+      end
+      render json: {tasks: @tasks.as_json(include: {user: {only: [:id, :name]}}), has_next: @has_next}, status: :ok
+      return
+    elsif completion == "incomplete"
+      @has_next = Task.where(user_id: user_id, is_completed: false).count > offset + 15 ? true : false
+      @tasks = Task.includes(:user).where(user_id: user_id, is_completed: false).order(created_at: :desc, id: :desc).limit(15).offset(offset)
+      if @tasks.count == 0
+        render json: { tasks: [], has_next: false }, status: :ok
+        return
+      end
+      render json: {tasks: @tasks.as_json(include: {user: {only: [:id, :name]}}), has_next: @has_next}, status: :ok
+      return
+    else
+      render json: { error: "不正な値が入力されています" }, status: :bad_request
+      return
     end
   end
 
@@ -115,7 +138,7 @@ class TasksController < ApplicationController
     params.require(:task).permit(:body)
   end
   def task_query_params
-    params.permit(:type, :page)
+    params.permit(:type, :page, :completion)
   end
   def task_put_params
     params.permit(:task_id)
