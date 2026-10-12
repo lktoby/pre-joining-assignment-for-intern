@@ -13,8 +13,8 @@ export async function createTask(taskBody: string, csrfToken: string): Promise<R
     });
 }
 
- export async function getTasks(type: string, page: number, csrfToken: string): Promise<Response> {
-    const response = await fetch(`/api/tasks?type=${type}&page=${page}`, {
+ export async function getTasks(type: string, completion: string, page: number, csrfToken: string): Promise<Response> {
+    const response = await fetch(`/api/tasks?type=${type}&completion=${completion}&page=${page}`, {
         method: 'GET',
         headers: {
             'Content-Type': 'application/json',
