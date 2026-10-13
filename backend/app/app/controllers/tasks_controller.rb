@@ -99,7 +99,7 @@ class TasksController < ApplicationController
       render json: { error: "ユーザーが見つかりません" }, status: :not_found
       return
     end
-    @task = Task.find_by(id: task_put_params[:task_id], user_id: @user.user_id)
+    @task = Task.find_by(id: params[:task_id], user_id: @user.user_id)
     if @task.nil?
       render json: { error: "タスクが見つかりません" }, status: :not_found
       return
@@ -122,7 +122,7 @@ class TasksController < ApplicationController
       render json: { error: "ユーザーが見つかりません" }, status: :not_found
       return
     end
-    @task = Task.find_by(id: task_put_params[:task_id], user_id: @user.user_id)
+    @task = Task.find_by(id: params[:task_id], user_id: @user.user_id)
     if @task.nil?
       render json: { error: "タスクが見つかりません" }, status: :not_found
       return
@@ -138,8 +138,5 @@ class TasksController < ApplicationController
   end
   def task_query_params
     params.permit(:type, :page, :completion)
-  end
-  def task_put_params
-    params.permit(:task_id)
   end
 end

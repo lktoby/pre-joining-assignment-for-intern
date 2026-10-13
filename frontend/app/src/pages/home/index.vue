@@ -1,5 +1,5 @@
 <script lang="tsx">
-import { createTask as createTaskReq, getTasks as getTasksReq } from '@/repositories/taskRepository';
+import { createTask as createTaskReq, getTasks as getTasksReq, updateTask as updateTaskReq } from '@/repositories/taskRepository';
 import { getCsrfToken } from '@/repositories/csrfTokenRepository';
 export default {
   data() {
@@ -30,7 +30,9 @@ export default {
             { value: 'incomplete', label: '未完了' },
             { value: 'complete', label: '完了' }
         ],
-        completion: 'all'
+        completion: 'all',
+        isCompleted: false,
+        updatingTaskIds: [] as number[]
     };
     },
     methods: {
@@ -91,6 +93,38 @@ export default {
             } finally {
                 this.isLoading = false;
             }
+        },
+        async checkTask(taskId: number, check: boolean) {
+            const completion = check ? 'complete' : 'incomplete';
+            const task = this.tasks.tasks.find((t: any) => t.id === taskId);
+            this.updatingTaskIds.push(taskId);
+            try {
+                const response = await updateTaskReq(taskId, completion, this.csrfToken);
+                if (response.ok) {
+                    const body = await response.json();
+                    if (task) {
+                        task.is_completed = body.task.is_completed;
+                    }
+                    console.log(body);
+                } else {
+                    if (task) {
+                        task.is_completed = !check;
+                    }
+                    const body = await response.json();
+                    window.alert(body.error);
+                }
+            } catch (error) {
+                if (task) {
+                    task.is_completed = !check;
+                }
+                console.error(error);
+                window.alert('タスクの更新に失敗しました');
+            } finally {
+                const index = this.updatingTaskIds.indexOf(taskId);
+                if (index !== -1) {
+                    this.updatingTaskIds.splice(index, 1);
+                }
+            }
         }
     },
     async mounted() {
@@ -127,6 +161,10 @@ export default {
             <span class="date">{{ formatDate(task.created_at) }}</span>
         </p>
         <p>{{ task.body }}</p>
+        <p v-if="taskType == 'my'">
+            <input type="checkbox" :checked="task.is_completed" @change="checkTask(task.id, !task.is_completed)" :disabled="updatingTaskIds.includes(task.id)">完了
+        </p>
+        <p v-if="taskType == 'others'">{{ task.is_completed ? '完了' : '未完了' }}</p>
         <hr>
     </div>
     <button v-if="tasks.has_next" :disabled="isLoading" v-on:click="getTasks(taskType, completion, page+1)">さらに読み込む</button>

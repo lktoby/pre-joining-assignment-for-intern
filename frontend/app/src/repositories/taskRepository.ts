@@ -13,7 +13,7 @@ export async function createTask(taskBody: string, csrfToken: string): Promise<R
     });
 }
 
- export async function getTasks(type: string, completion: string, page: number, csrfToken: string): Promise<Response> {
+export async function getTasks(type: string, completion: string, page: number, csrfToken: string): Promise<Response> {
     const response = await fetch(`/api/tasks?type=${type}&completion=${completion}&page=${page}`, {
         method: 'GET',
         headers: {
@@ -23,5 +23,17 @@ export async function createTask(taskBody: string, csrfToken: string): Promise<R
         credentials: 'include',
     });
     
+    return response;
+ }
+
+export async function updateTask(taskId: number, completion: string, csrfToken: string): Promise<Response> {
+    const response = await fetch(`/api/tasks/${taskId}/${completion}`, {
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-Token': csrfToken,
+        },
+        credentials: 'include',
+    })
     return response;
 }
