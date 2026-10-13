@@ -11,9 +11,13 @@ class FavoriteTasksController < ApplicationController
     end
     user_id = @user.user_id
     task_id = params[:task_id]
-    @task = Task.where.not(user_id: user_id).find_by(id: task_id)
+    @task = Task.find_by(id: task_id)
     if @task.nil?
       render json: { error: "タスクが見つかりません" }, status: :not_found
+      return
+    end
+    if @task.user_id == user_id
+      render json: { error: "自分のタスクはお気に入り登録できません" }, status: :unprocessable_entity
       return
     end
     if FavoriteTask.exists?(user_id: user_id, task_id: task_id)

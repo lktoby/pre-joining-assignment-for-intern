@@ -1,3 +1,4 @@
+require "set"
 class TasksController < ApplicationController
   def create
     if session[:identifier].nil?
@@ -62,7 +63,10 @@ class TasksController < ApplicationController
         render json: { tasks: [], has_next: false }, status: :ok
         return
       end
-      render json: {tasks: @tasks.as_json(include: {user: {only: [:id, :name]}}), has_next: @has_next}, status: :ok
+      tasks_json = @tasks.map do |task|
+        task.as_json(include: {user: {only: [:id, :name]}}).merge(is_favorited: false)
+      end
+      render json: {tasks: tasks_json, has_next: @has_next}, status: :ok
       return
     elsif type == "others"
       @has_next = Task.where.not(user_id: user_id).count > offset + 15 ? true : false
@@ -78,7 +82,30 @@ class TasksController < ApplicationController
         render json: { tasks: [], has_next: false }, status: :ok
         return
       end
-      render json: {tasks: @tasks.as_json(include: {user: {only: [:id, :name]}}), has_next: @has_next}, status: :ok
+      favorite_task_ids = FavoriteTask.where(user_id: user_id, task_id: @tasks.map(&:id)).pluck(:task_id).to_set
+      tasks_json = @tasks.map do |task|
+        task.as_json(include: {user: {only: [:id, :name]}}).merge(is_favorited: favorite_task_ids.include?(task.id))
+      end
+      render json: {tasks: tasks_json, has_next: @has_next}, status: :ok
+      return
+    elsif type == "favorites"
+      @has_next = FavoriteTask.where(user_id: user_id).count > offset + 15 ? true : false
+      @tasks = Task.joins(:favorite_tasks).includes(:user).where(favorite_tasks: {user_id: user_id}).order(tasks: {created_at: :desc, id: :desc}).limit(15).offset(offset)
+      if completion == "complete"
+        @has_next = FavoriteTask.joins(:task).where(user_id: user_id).where(tasks: { is_completed: true }).count > offset + 15 ? true : false
+        @tasks = Task.joins(:favorite_tasks).includes(:user).where(favorite_tasks: {user_id: user_id}).where(tasks: { is_completed: true }).order(tasks: {created_at: :desc, id: :desc}).limit(15).offset(offset)
+      elsif completion == "incomplete"
+        @has_next = FavoriteTask.joins(:task).where(user_id: user_id).where(tasks: { is_completed: false }).count > offset + 15 ? true : false
+        @tasks = Task.joins(:favorite_tasks).includes(:user).where(favorite_tasks: {user_id: user_id}).where(tasks: { is_completed: false }).order(tasks: {created_at: :desc, id: :desc}).limit(15).offset(offset)
+      end
+      if @tasks.count == 0
+        render json: { tasks: [], has_next: false }, status: :ok
+        return
+      end
+      tasks_json = @tasks.map do |task|
+        task.as_json(include: {user: {only: [:id, :name]}}).merge(is_favorited: true)
+      end
+      render json: {tasks: tasks_json, has_next: @has_next}, status: :ok
       return
     else
       render json: { error: "不正な値が入力されています" }, status: :bad_request
