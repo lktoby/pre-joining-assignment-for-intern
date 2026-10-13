@@ -15,8 +15,10 @@ cp ./backend/.env.example ./backend/.env
 cp ./frontend/.env.example ./frontend/.env
 cp ./db/.env.example ./db/.env
 
-sed -i '' "s/MYSQL_ROOT_PASSWORD=/MYSQL_ROOT_PASSWORD=$(openssl rand -hex 32)/" ./db/.env
-sed -i '' "s/DATABASE_USER_PASSWORD=/DATABASE_USER_PASSWORD=$(openssl rand -hex 32)/" ./backend/.env
+mysql_root_password=$(openssl rand -hex 32)
+database_user_password=$(openssl rand -hex 32)
+sed -i "s/^MYSQL_ROOT_PASSWORD=.*/MYSQL_ROOT_PASSWORD=${mysql_root_password}/" ./db/.env
+sed -i "s/^DATABASE_USER_PASSWORD=.*/DATABASE_USER_PASSWORD=${database_user_password}/" ./backend/.env
 
 set -a
 . ./backend/.env
@@ -35,11 +37,11 @@ docker compose up -d --wait db
 
 docker compose exec -T db mysql \
   -uroot \
-  -p"root" <<QUERY
+  -p"${MYSQL_ROOT_PASSWORD}" <<QUERY
     CREATE DATABASE IF NOT EXISTS pre_joining_assignment_for_intern
       CHARACTER SET "utf8mb4"
       COLLATE "utf8mb4_0900_ai_ci";
-    CREATE USER IF NOT EXISTS 'rails_client'@'%' IDENTIFIED BY 'root';
+    CREATE USER IF NOT EXISTS 'rails_client'@'%' IDENTIFIED BY '${DATABASE_USER_PASSWORD}';
     GRANT
       ALTER,
       CREATE,
