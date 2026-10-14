@@ -10,7 +10,17 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_06_011015) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_13_042120) do
+  create_table "favorite_tasks", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.bigint "task_id", null: false
+    t.datetime "updated_at", null: false
+    t.bigint "user_id", null: false
+    t.index ["task_id"], name: "index_favorite_tasks_on_task_id"
+    t.index ["user_id", "task_id"], name: "index_favorite_tasks_on_user_id_and_task_id", unique: true
+    t.index ["user_id"], name: "index_favorite_tasks_on_user_id"
+  end
+
   create_table "tasks", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
     t.string "body"
     t.datetime "created_at", null: false
@@ -34,6 +44,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_06_011015) do
     t.datetime "updated_at", null: false
   end
 
+  add_foreign_key "favorite_tasks", "tasks", on_delete: :cascade
+  add_foreign_key "favorite_tasks", "users", on_delete: :cascade
   add_foreign_key "tasks", "users"
   add_foreign_key "user_authentications", "users"
 end

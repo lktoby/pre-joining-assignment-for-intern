@@ -21,6 +21,10 @@ Rails.application.routes.draw do
 
   put "/api/tasks/:task_id/incomplete", to: "tasks#incomplete"
 
+  post "/api/tasks/:task_id/favorite", to: "favorite_tasks#create"
+
+  delete "/api/tasks/:task_id/favorite", to: "favorite_tasks#destroy"
+
   # Defines the root path route ("/")
   # root "posts#index"
 end

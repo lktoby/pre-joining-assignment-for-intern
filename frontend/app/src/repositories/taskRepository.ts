@@ -37,3 +37,15 @@ export async function updateTask(taskId: number, completion: string, csrfToken: 
     })
     return response;
 }
+
+export async function favoriteTask(taskId: number, isFavorited: boolean, csrfToken: string): Promise<Response> {
+    const response = await fetch(`/api/tasks/${taskId}/favorite`, {
+        method: isFavorited ? 'DELETE' : 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-Token': csrfToken,
+        },
+        credentials: 'include',
+    })
+    return response;
+}
