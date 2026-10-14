@@ -1,5 +1,5 @@
 <script lang="tsx">
-import { createTask as createTaskReq, getTasks as getTasksReq, updateTask as updateTaskReq } from '@/repositories/taskRepository';
+import { createTask as createTaskReq, getTasks as getTasksReq, updateTask as updateTaskReq, favoriteTask as favoriteTaskReq } from '@/repositories/taskRepository';
 import { getCsrfToken } from '@/repositories/csrfTokenRepository';
 export default {
   data() {
@@ -14,6 +14,7 @@ export default {
                     id: 0,
                     body: '',
                     is_completed: false,
+                    is_favorited: false,
                     created_at: '',
                     updated_at: '',
                     user: {
@@ -31,8 +32,7 @@ export default {
             { value: 'complete', label: '完了' }
         ],
         completion: 'all',
-        isCompleted: false,
-        updatingTaskIds: [] as number[]
+        updatingTaskIds: [] as number[],
     };
     },
     methods: {
@@ -125,6 +125,37 @@ export default {
                     this.updatingTaskIds.splice(index, 1);
                 }
             }
+        },
+        async favoriteTask(taskId: number, isFavorited: boolean) {
+            const task = this.tasks.tasks.find((t: any) => t.id === taskId);
+            this.updatingTaskIds.push(taskId);
+            try {
+                const response = await favoriteTaskReq(taskId, isFavorited, this.csrfToken);
+                if (response.ok) {
+                    const body = await response.json();
+                    if (task) {
+                        task.is_favorited = !isFavorited;
+                        if (task.is_favorited === false && this.taskType === 'favorites') {
+                            await this.getTasks('favorites', this.completion, 1);
+                        }
+                    }
+                    console.log(body);
+                } else {
+                    if (task) {
+                        task.is_favorited = isFavorited;
+                    }
+                    const body = await response.json();
+                    window.alert(body.error);
+                }
+            } catch (error) {
+                console.error(error);
+                window.alert('お気に入りの更新に失敗しました');
+            } finally {
+                const index = this.updatingTaskIds.indexOf(taskId);
+                if (index !== -1) {
+                    this.updatingTaskIds.splice(index, 1);
+                }
+            }
         }
     },
     async mounted() {
@@ -151,6 +182,7 @@ export default {
     <br>
         <router-link to="/"><button v-on:click="getTasks('my', 'all', 1)">Myタスク</button></router-link>
         <router-link to="/"><button v-on:click="getTasks('others', 'all', 1)">みんなのタスク</button></router-link>
+        <router-link to="/"><button v-on:click="getTasks('favorites', 'all', 1)">お気に入りタスク</button></router-link>
     <br>
     <div v-if="tasks.tasks.length === 0">
         <p>表示できるタスクがありません</p>
@@ -164,7 +196,7 @@ export default {
         <p v-if="taskType == 'my'">
             <input type="checkbox" :checked="task.is_completed" @change="checkTask(task.id, !task.is_completed)" :disabled="updatingTaskIds.includes(task.id)">完了
         </p>
-        <p v-if="taskType == 'others'">{{ task.is_completed ? '完了' : '未完了' }}</p>
+        <p v-if="taskType != 'my'">{{ task.is_completed ? '完了' : '未完了' }} <button v-on:click="favoriteTask(task.id, task.is_favorited)" :disabled="updatingTaskIds.includes(task.id)">{{ task.is_favorited ? 'お気に入り解除' : 'お気に入り' }}</button> </p>
         <hr>
     </div>
     <button v-if="tasks.has_next" :disabled="isLoading" v-on:click="getTasks(taskType, completion, page+1)">さらに読み込む</button>
