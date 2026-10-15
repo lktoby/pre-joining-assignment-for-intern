@@ -64,7 +64,7 @@ class TasksController < ApplicationController
         return
       end
       tasks_json = @tasks.map do |task|
-        task.as_json(include: {user: {only: [:id, :name]}}).merge(is_favorited: false)
+        task.as_json(include: {user: {only: [:id, :name]}}).merge(is_favorited: false, is_following: false)
       end
       render json: {tasks: tasks_json, has_next: @has_next}, status: :ok
       return
@@ -83,8 +83,9 @@ class TasksController < ApplicationController
         return
       end
       favorite_task_ids = FavoriteTask.where(user_id: user_id, task_id: @tasks.map(&:id)).pluck(:task_id).to_set
+      following_user_ids = Follow.where(user_id: user_id, target_user_id: @tasks.map(&:user_id)).pluck(:target_user_id).to_set
       tasks_json = @tasks.map do |task|
-        task.as_json(include: {user: {only: [:id, :name]}}).merge(is_favorited: favorite_task_ids.include?(task.id))
+        task.as_json(include: {user: {only: [:id, :name]}}).merge(is_favorited: favorite_task_ids.include?(task.id), is_following: following_user_ids.include?(task.user_id))
       end
       render json: {tasks: tasks_json, has_next: @has_next}, status: :ok
       return
@@ -102,8 +103,29 @@ class TasksController < ApplicationController
         render json: { tasks: [], has_next: false }, status: :ok
         return
       end
+      following_user_ids = Follow.where(user_id: user_id, target_user_id: @tasks.map(&:user_id)).pluck(:target_user_id).to_set
       tasks_json = @tasks.map do |task|
-        task.as_json(include: {user: {only: [:id, :name]}}).merge(is_favorited: true)
+        task.as_json(include: {user: {only: [:id, :name]}}).merge(is_favorited: true, is_following: following_user_ids.include?(task.user_id))
+      end
+      render json: {tasks: tasks_json, has_next: @has_next}, status: :ok
+      return
+    elsif type == "following"
+      target_user_ids = Follow.where(user_id: user_id).select(:target_user_id)
+      @tasks = Task.includes(:user).where(user_id: target_user_ids)
+      if completion == "complete"
+        @tasks = Task.includes(:user).where(user_id: target_user_ids, is_completed: true)
+      elsif completion == "incomplete"
+        @tasks = Task.includes(:user).where(user_id: target_user_ids, is_completed: false)
+      end
+      @has_next = @tasks.count > offset + 15 ? true : false
+      @tasks = @tasks.order(created_at: :desc, id: :desc).limit(15).offset(offset)
+      if @tasks.count == 0
+        render json: { tasks: [], has_next: false }, status: :ok
+        return
+      end
+      favorite_task_ids = FavoriteTask.where(user_id: user_id, task_id: @tasks.map(&:id)).pluck(:task_id).to_set
+      tasks_json = @tasks.map do |task|
+        task.as_json(include: {user: {only: [:id, :name]}}).merge(is_favorited: favorite_task_ids.include?(task.id), is_following: true)
       end
       render json: {tasks: tasks_json, has_next: @has_next}, status: :ok
       return
