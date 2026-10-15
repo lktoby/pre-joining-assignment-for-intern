@@ -49,3 +49,15 @@ export async function favoriteTask(taskId: number, isFavorited: boolean, csrfTok
     })
     return response;
 }
+
+export async function followUser(targetUserId: number, isFollowing: boolean, csrfToken: string): Promise<Response> {
+    const response = await fetch(`/api/users/follow/${targetUserId}`, {
+        method: isFollowing ? 'DELETE' : 'PUT',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-Token': csrfToken,
+        },
+        credentials: 'include',
+    })
+    return response;
+}
