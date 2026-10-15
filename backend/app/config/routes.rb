@@ -1,4 +1,6 @@
 Rails.application.routes.draw do
+  get "follows/create"
+  get "follows/destroy"
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
 
   # Reveal health status on /up that returns 200 if the app boots with no exceptions, otherwise 500.
@@ -24,6 +26,10 @@ Rails.application.routes.draw do
   post "/api/tasks/:task_id/favorite", to: "favorite_tasks#create"
 
   delete "/api/tasks/:task_id/favorite", to: "favorite_tasks#destroy"
+
+  put "/api/users/follow/:target_user_id", to: "follows#create"
+
+  delete "/api/users/follow/:target_user_id", to: "follows#destroy"
 
   # Defines the root path route ("/")
   # root "posts#index"
